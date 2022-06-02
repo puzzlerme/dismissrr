@@ -106,8 +106,10 @@
 <script src="sha256.min.js"></script>
 
 <script>
-
-var password = prompt("Enter password: ");
+var password;
+do {
+    password = prompt("Enter password: ");
+} while (password == null || password == "" );
 password = sha256(password);
 var passwordReturn = jQuery.ajax('https://www.dismissrr.rf.gd/enterPassword.php?password=' + password);
 passwordReturn.then(() => checkPassword());
