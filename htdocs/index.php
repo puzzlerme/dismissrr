@@ -103,10 +103,23 @@
 ?>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="sha256.min.js"></script>
 
 <script>
 
-// Maybe make the json file a script for mac instead? or would i still not be able to push stuff?
+var password = prompt("Enter password: ");
+password = sha256(password);
+var passwordReturn = jQuery.ajax('https://www.dismissrr.rf.gd/enterPassword.php?password=' + password);
+passwordReturn.then(() => checkPassword());
+var passwordCorrect;
+
+function checkPassword() {
+    passwordCorrect = passwordReturn.responseText.includes("1");
+    if (!passwordCorrect) {
+        document.body.parentNode.removeChild(document.body);
+        document.head.parentNode.removeChild(document.head);
+    }
+}
 
 $.fn.regexMask = function(mask) {
     $(this).keypress(function (event) {
@@ -220,7 +233,7 @@ function modifyNames() {
 
 function sendNameUpdates(formattedList) {
   const xhttp = new XMLHttpRequest();
-  xhttp.open("GET", "editStudentNames.php?list="+formattedList);
+  xhttp.open("GET", "editStudentNames.php?list="+formattedList+"?password="+password);
   xhttp.onload = function() {
     //cancelNextLoad = true;
     //loadStudentNamesXML();
