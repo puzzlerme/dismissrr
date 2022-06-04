@@ -6,9 +6,9 @@
 <body>
 
 <?php 
-    if (file_get_contents('adminPassword.json') == hash('sha256', $_GET['password'])) {
+    if (file_get_contents('adminPassword.json') == hash('sha256', htmlspecialchars($_GET['password'], ENT_QUOTES))) {
         echo "2";
-    } else if (file_get_contents('password.json') == hash('sha256', $_GET['password'])) {
+    } else if (file_get_contents('password.json') == hash('sha256', htmlspecialchars($_GET['password'], ENT_QUOTES))) {
         echo "1";
     }
 ?>
