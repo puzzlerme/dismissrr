@@ -111,10 +111,12 @@
 
 var password;
 var permissions;
+var salt = "tMr3XAzrSYF/229xhglYQgSPxVE8FFYr";
 function enterPassword() {
     do {
         password = prompt("Enter password: ");
     } while (password == null || password == "" );
+    password = password + salt;
     password = sha256(password);
     var passwordReturn = jQuery.ajax('./enterPassword.php?password=' + password);
     passwordReturn.then(() => checkPassword());
@@ -154,6 +156,15 @@ function enterPassword() {
     }
 }
 enterPassword();
+
+const ascii64 =
+'./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+function random_salt(length) {
+    var salt = '';
+    for (var i=0; i<length; i++)
+        salt += ascii64.charAt( Math.floor(64 * Math.random()) );
+    return salt;
+}
 
 $.fn.regexMask = function(mask) {
     $(this).keypress(function (event) {
