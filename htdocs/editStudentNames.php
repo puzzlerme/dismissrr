@@ -5,15 +5,11 @@
 </head>
 <body>
 
-<?php 
-    $password = $_GET['password'];
-    $password = hash('sha256', $password);
-    $equal = file_get_contents('password.json') == $password;
-    if ($equal) {
-        $studentList = $_GET['list'];
-        echo file_put_contents('studentNames.json', $studentList);
+<?php
+    if (file_get_contents('adminPassword.json') == hash('sha256', $_GET['password'])) {
+        echo file_put_contents('studentNames.json', $_GET['list']);
     }
-    header("Location: http://www.dismissrr.rf.gd");
+    //header("Location: http://www.dismissrr.rf.gd");
 ?>
 
 </body>
