@@ -51,7 +51,7 @@
   //https://keys.dismissrr.com/assets/header.jpg - jpg of keys dismissrr background
 
   .button {
-      background-color: #FFFFFF; /* Green */
+      background-color: #FFFFFF; // Green
       border: none;
       color: white;
       padding: 16px 32px;
@@ -68,11 +68,11 @@
       border-radius: 6px;
   }
 
-  .button:hover {
+  /*.button:hover {
       background-color: #4CAF50;
       color: black;
       border-radius: 6px;
-  }
+  }*/
 
 </style>
 </head>
@@ -81,47 +81,79 @@
 <h1 style="font-size:60px; font-weight:bold;">Dismissrr 2.0</h1>
 <p>Newest Student: <span id="newestStudent"> </span></p>
 
-<p>Enter Name: <input type="text" id="studentName" value ="" size=20>
-<button id="sub" onclick="submitName(studentName.value)">Submit</button>
+<div id="enterName">
+    <p id="enterNameText">Enter Name: <input type="text" id="studentName" value ="" size=20>
+    <button id="submit" onclick="submitName(studentName.value)">Submit</button>
+</div>
 
-<p>List of Students: <span id="listOfStudentsText"></span></p>
+<span>List of Students: </span><span id="listOfStudentsText"></span>
 
 <div id="studentNameLoader">
-  <button type="button" class="button" onclick="loadStudentNamesXML()">Force Load New Names</button>
+  <button type="button" class="button" onclick="loadStudentNamesAjax()">Force Load New Names</button>
 </div>
 
 <br>
 <button type="button" class="button" onclick="clearInterval(intervalId)">Stop Loading</button>
 <button type="button" class="button" onclick="window.speechSynthesis.cancel()">Fix TTS</button>
-<button type="button" class="button" onclick='sendNameUpdates("[]")'>Reset Names</button>
+<button id="resetNames" type="button" class="button" onclick='sendNameUpdates("[]")'>Reset Names</button>
 
 <?php
-    function loadNamesPHP() {
+    /*function loadNamesPHP() {
         $namesJSON = file_get_contents('./studentNames.json');
         return $namesJSON;
-    }
+    }*/
 ?>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="sha256.min.js"></script>
 
 <script>
-var password;
-do {
-    password = prompt("Enter password: ");
-} while (password == null || password == "" );
-password = sha256(password);
-var passwordReturn = jQuery.ajax('https://www.dismissrr.rf.gd/enterPassword.php?password=' + password);
-passwordReturn.then(() => checkPassword());
-var passwordCorrect;
 
-function checkPassword() {
-    passwordCorrect = passwordReturn.responseText.includes("1");
-    if (!passwordCorrect) {
-        document.body.parentNode.removeChild(document.body);
-        document.head.parentNode.removeChild(document.head);
+var password;
+var permissions;
+function enterPassword() {
+    do {
+        password = prompt("Enter password: ");
+    } while (password == null || password == "" );
+    password = sha256(password);
+    var passwordReturn = jQuery.ajax('./enterPassword.php?password=' + password);
+    passwordReturn.then(() => checkPassword());
+    var passwordCorrect;
+
+    function checkPassword() {
+        passwordCorrect = passwordReturn.responseText.includes("1") || passwordReturn.responseText.includes("2");
+        if (passwordReturn.responseText.includes("1")) {
+            permissions = "User";
+            let removeElement;
+            removeElement = document.getElementById('enterName');
+            removeElement.parentElement.removeChild(removeElement);
+            removeElement = document.getElementById('resetNames');
+            removeElement.parentElement.removeChild(removeElement);
+        } else if (passwordReturn.responseText.includes("2")) {
+            permissions = "Admin";
+            var elem = document.getElementById("studentName");
+            elem.onkeyup = function(e){
+                if(e.keyCode == 13){
+                submitName(studentName.value);
+                }
+            }
+        }
+        if (!passwordCorrect) {
+            document.body.parentNode.removeChild(document.body);
+            document.head.parentNode.removeChild(document.head);
+        } else {
+            loadStudentNamesAjax();
+            var intervalId = window.setInterval(function(){
+                if (cancelNextLoad) {
+                    cancelNextLoad = false;
+                } else {
+                    loadStudentNamesAjax();
+                }
+            }, (intervalTime * 1000));
+        }
     }
 }
+enterPassword();
 
 $.fn.regexMask = function(mask) {
     $(this).keypress(function (event) {
@@ -141,22 +173,13 @@ var intervalTime = 3;
 var tts = false;
 var cancelNextLoad = false;
 
-loadStudentNamesXML();
-var intervalId = window.setInterval(function(){
-    if (cancelNextLoad) {
-        cancelNextLoad = false;
-    } else {
-        loadStudentNamesXML();
-    }
-}, (intervalTime * 1000));
-
-function loadStudentNamesPHP() {
-    listOfStudents = <?php echo loadNamesPHP();?>;
+/*function loadStudentNamesPHP() {
+    listOfStudents = <//?php echo loadNamesPHP();?>;
     updateNewestStudent();
     displayNames();
-}
+}*/
 
-function loadStudentNamesXML() {
+/*function loadStudentNamesXML() {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
@@ -168,22 +191,27 @@ function loadStudentNamesXML() {
   }
   xhttp.open("GET", "studentNames.json", true);
   xhttp.send();
+}*/
+
+function loadStudentNamesAjax() {
+    var namesReturn = jQuery.ajax('./getNames.php?password=' + password);
+    namesReturn.then(() => namesLoaded());
+
+    function namesLoaded() {
+        let raw = namesReturn.responseText.replace("<!DOCTYPE html>\n<html>\n<head>\n    <meta http-equiv=\"Content-Security-Policy\" content=\"upgrade-insecure-requests\">\n</head>\n<body>\n\n", "").replace("\n</body>\n</html>", "");
+        listOfStudents = JSON.parse(raw);
+        updateNewestStudent();
+        displayNames();
+    }
 }
 
-function jQueryLoadStudentNames() {
+/*function jQueryLoadStudentNames() {
     $.getJSON('studentNames.json', function(data) {
     listOfStudents = data;
     updateNewestStudent();
     displayNames();
     });
-}
-
-var elem = document.getElementById("studentName");
-elem.onkeyup = function(e){
-    if(e.keyCode == 13){
-       submitName(studentName.value);
-    }
-}
+}*/
 
 if ('speechSynthesis' in window) {
     tts = true;
@@ -213,7 +241,7 @@ function updateNewestStudent() {
 
 function submitName(newName) {
     document.getElementById("studentName").value = '';
-    loadStudentNamesXML();
+    loadStudentNamesAjax();
     listOfStudents.push(newName);
     cancelNextLoad = true;
     modifyNames(listOfStudents);
@@ -238,7 +266,7 @@ function sendNameUpdates(formattedList) {
   xhttp.open("GET", "editStudentNames.php?list="+formattedList+"?password="+password);
   xhttp.onload = function() {
     //cancelNextLoad = true;
-    //loadStudentNamesXML();
+    //loadStudentNamesAjax();
   }
   xhttp.send();
 }
