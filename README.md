@@ -1,2 +1,2 @@
 # Dismissrr
-Originally planned as a dismissal system, now functions as a password-protected live(ish) chat system.
+Password-protected dismissal system with admin and viewer accounts and a QR code reader.
