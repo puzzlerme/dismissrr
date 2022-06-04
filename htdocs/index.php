@@ -85,8 +85,9 @@
     <p id="enterNameText">Enter Name: <input type="text" id="studentName" value ="" size=20>
     <button id="submit" onclick="submitName(studentName.value)">Submit</button>
 </div>
+<div style="width: 500px; margin:0 auto;" id="reader"></div>
 
-<span>List of Students: </span><span id="listOfStudentsText"></span>
+<span style="text-decoration: underline">List of Students: </span><span id="listOfStudentsText"></span>
 
 <div id="studentNameLoader">
   <button type="button" class="button" onclick="loadStudentNamesAjax()">Force Load New Names</button>
@@ -106,6 +107,8 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="sha256.min.js"></script>
+
+<script src="html5-qrcode.min.js" type="text/javascript"></script>
 
 <script>
 
@@ -130,6 +133,8 @@ function enterPassword() {
             removeElement = document.getElementById('enterName');
             removeElement.parentElement.removeChild(removeElement);
             removeElement = document.getElementById('resetNames');
+            removeElement.parentElement.removeChild(removeElement);
+            removeElement = document.getElementById('reader');
             removeElement.parentElement.removeChild(removeElement);
         } else if (passwordReturn.responseText.includes("2")) {
             permissions = "Admin";
@@ -165,6 +170,20 @@ function random_salt(length) {
         salt += ascii64.charAt( Math.floor(64 * Math.random()) );
     return salt;
 }
+
+var html5QrcodeScanner = new Html5QrcodeScanner(
+    "reader", { fps: 10, qrbox: 250 });
+function onScanSuccess(decodedText, decodedResult) {
+    // Handle on success condition with the decoded text or result.
+    console.log(`Scan result: ${decodedText}`, decodedResult);
+    // ...
+    //html5QrcodeScanner.clear();
+    // ^ this will stop the scanner (video feed) and clear the scan area.
+}
+function onScanError(errorMessage) {
+    // handle on error condition, with error message
+}
+html5QrcodeScanner.render(onScanSuccess, onScanError);
 
 $.fn.regexMask = function(mask) {
     $(this).keypress(function (event) {
