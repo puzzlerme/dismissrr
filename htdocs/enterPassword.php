@@ -6,9 +6,10 @@
 <body>
 
 <?php 
-    if (file_get_contents('adminPassword.json') == hash('sha256', htmlspecialchars($_GET['password'], ENT_QUOTES))) {
+    $salt = "SENtxqzqMrcWIVhShV01.LkLNSJkggNw";
+    if (file_get_contents('adminPassword.json') == hash('sha256', htmlspecialchars($_GET['password'] . $salt, ENT_QUOTES))) {
         echo "2";
-    } else if (file_get_contents('password.json') == hash('sha256', htmlspecialchars($_GET['password'], ENT_QUOTES))) {
+    } else if (file_get_contents('password.json') == hash('sha256', htmlspecialchars($_GET['password'] . $salt, ENT_QUOTES))) {
         echo "1";
     }
 ?>
