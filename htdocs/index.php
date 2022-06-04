@@ -85,7 +85,7 @@
     <p id="enterNameText">Enter Name: <input type="text" id="studentName" value ="" size=20>
     <button id="submit" onclick="submitName(studentName.value)">Submit</button>
 </div>
-<div style="width: 500px; margin:0 auto;" id="reader"></div>
+<div style="width: 400px; margin:0 auto;" id="reader"></div>
 
 <span style="text-decoration: underline">List of Students: </span><span id="listOfStudentsText"></span>
 
@@ -175,7 +175,8 @@ var html5QrcodeScanner = new Html5QrcodeScanner(
     "reader", { fps: 10, qrbox: 250 });
 function onScanSuccess(decodedText, decodedResult) {
     // Handle on success condition with the decoded text or result.
-    console.log(`Scan result: ${decodedText}`, decodedResult);
+    //console.log(`Scan result: ${decodedText}`, decodedResult);
+    document.getElementById("studentName").value = decodedText;
     // ...
     //html5QrcodeScanner.clear();
     // ^ this will stop the scanner (video feed) and clear the scan area.
