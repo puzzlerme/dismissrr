@@ -18,7 +18,8 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png?v=6">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png?v=6">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png?v=6">
-<link rel="manifest" href="/favicons/site.webmanifest?v=6">
+<!--<link rel="manifest" href="/favicons/site.webmanifest?v=6">-->
+<!-- Removed because it gave an error and is only supported on some Android/Samsung devices-->
 <link rel="mask-icon" href="/favicons/safari-pinned-tab.svg?v=6" color="#5bbad5">
 <link rel="shortcut icon" href="/favicons/favicon.ico?v=6">
 <meta name="msapplication-TileColor" content="#000000">
@@ -90,7 +91,7 @@
 <span style="text-decoration: underline">List of Students: </span><span id="listOfStudentsText"></span>
 
 <div id="studentNameLoader">
-  <button type="button" class="button" onclick="loadStudentNamesAjax()">Force Load New Names</button>
+  <button type="button" class="button" onclick="loadStudentNamesPost()">Force Load New Names</button>
 </div>
 
 <br>
@@ -111,6 +112,7 @@
 <script src="html5-qrcode.min.js" type="text/javascript"></script>
 
 <script>
+var intervalId;
 
 var password;
 var permissions;
@@ -121,13 +123,17 @@ function enterPassword() {
     } while (password == null || password == "" );
     password = password + salt;
     password = sha256(password);
-    var passwordReturn = jQuery.ajax('./enterPassword.php?password=' + password);
-    passwordReturn.then(() => checkPassword());
+    $.post( "./enterPassword.php", { password: password })
+    .done(function( data ) {
+        checkPassword(data);
+    });
+    /*var passwordReturn = jQuery.ajax('./enterPassword.php?password=' + password);
+    passwordReturn.then(() => checkPassword());*/
     var passwordCorrect;
 
-    function checkPassword() {
-        passwordCorrect = passwordReturn.responseText.includes("1") || passwordReturn.responseText.includes("2");
-        if (passwordReturn.responseText.includes("1")) {
+    function checkPassword(data) {
+        passwordCorrect = data.includes("1") || data.includes("2");
+        if (data.includes("1")) {
             permissions = "User";
             let removeElement;
             removeElement = document.getElementById('enterName');
@@ -136,7 +142,7 @@ function enterPassword() {
             removeElement.parentElement.removeChild(removeElement);
             removeElement = document.getElementById('reader');
             removeElement.parentElement.removeChild(removeElement);
-        } else if (passwordReturn.responseText.includes("2")) {
+        } else if (data.includes("2")) {
             permissions = "Admin";
             var elem = document.getElementById("studentName");
             elem.onkeyup = function(e){
@@ -149,18 +155,27 @@ function enterPassword() {
             document.body.parentNode.removeChild(document.body);
             document.head.parentNode.removeChild(document.head);
         } else {
-            loadStudentNamesAjax();
-            var intervalId = window.setInterval(function(){
+            loadStudentNamesPost();
+            intervalId = window.setInterval(function(){
                 if (cancelNextLoad) {
                     cancelNextLoad = false;
                 } else {
-                    loadStudentNamesAjax();
+                    loadStudentNamesPost();
                 }
             }, (intervalTime * 1000));
         }
     }
 }
-enterPassword();
+if (document.visibilityState != "hidden") {
+    enterPassword();
+} else {
+    $(document).on('visibilitychange', function() {
+        if (document.visibilityState != "hidden") {
+            enterPassword();
+            $(document).off('visibilitychange');
+        }
+    })
+}
 
 const ascii64 =
 './0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -224,7 +239,7 @@ var cancelNextLoad = false;
   xhttp.send();
 }*/
 
-function loadStudentNamesAjax() {
+/*function loadStudentNamesAjax() {
     var namesReturn = jQuery.ajax('./getNames.php?password=' + password);
     namesReturn.then(() => namesLoaded());
 
@@ -234,6 +249,16 @@ function loadStudentNamesAjax() {
         updateNewestStudent();
         displayNames();
     }
+}*/
+
+function loadStudentNamesPost() {
+    $.post( "./getNames.php", { password: password })
+    .done(function( data ) {
+        let raw = data.replace("<!DOCTYPE html>\n<html>\n<head>\n    <meta http-equiv=\"Content-Security-Policy\" content=\"upgrade-insecure-requests\">\n</head>\n<body>\n\n", "").replace("\n</body>\n</html>", "");
+        listOfStudents = JSON.parse(raw);
+        updateNewestStudent();
+        displayNames();
+    });
 }
 
 /*function jQueryLoadStudentNames() {
@@ -272,7 +297,7 @@ function updateNewestStudent() {
 
 function submitName(newName) {
     document.getElementById("studentName").value = '';
-    loadStudentNamesAjax();
+    loadStudentNamesPost();
     listOfStudents.push(newName);
     cancelNextLoad = true;
     modifyNames(listOfStudents);
@@ -297,7 +322,7 @@ function sendNameUpdates(formattedList) {
   xhttp.open("GET", "editStudentNames.php?list="+formattedList+"?password="+password);
   xhttp.onload = function() {
     //cancelNextLoad = true;
-    //loadStudentNamesAjax();
+    //loadStudentNamesPost();
   }
   xhttp.send();
 }
