@@ -7,9 +7,9 @@
 
 <?php 
     $salt = "SENtxqzqMrcWIVhShV01.LkLNSJkggNw";
-    if (file_get_contents('adminPassword.json') == hash('sha256', htmlspecialchars($_GET['password'] . $salt, ENT_QUOTES))) {
+    if (file_get_contents('adminPassword.json') == hash('sha256', htmlspecialchars($_POST['password'] . $salt, ENT_QUOTES))) {
         echo "2";
-    } else if (file_get_contents('password.json') == hash('sha256', htmlspecialchars($_GET['password'] . $salt, ENT_QUOTES))) {
+    } else if (file_get_contents('password.json') == hash('sha256', htmlspecialchars($_POST['password'] . $salt, ENT_QUOTES))) {
         echo "1";
     }
 ?>
