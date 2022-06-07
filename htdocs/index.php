@@ -252,14 +252,28 @@ var cancelNextLoad = false;
 }*/
 
 function loadStudentNamesPost() {
-    $.post( "./getNames.php", { password: password })
-    .done(function( data ) {
-        let raw = data.replace("<!DOCTYPE html>\n<html>\n<head>\n    <meta http-equiv=\"Content-Security-Policy\" content=\"upgrade-insecure-requests\">\n</head>\n<body>\n\n", "").replace("\n</body>\n</html>", "");
-        listOfStudents = JSON.parse(raw);
-        updateNewestStudent();
-        displayNames();
-    });
+    if (window.navigator.onLine) {
+        $.post( "./getNames.php", { password: password })
+        .done(function( data ) {
+            let raw = data.replace("<!DOCTYPE html>\n<html>\n<head>\n    <meta http-equiv=\"Content-Security-Policy\" content=\"upgrade-insecure-requests\">\n</head>\n<body>\n\n", "").replace("\n</body>\n</html>", "");
+            listOfStudents = JSON.parse(raw);
+            updateNewestStudent();
+            displayNames();
+        });
+    }
 }
+window.addEventListener('online', () => 
+    window.setInterval(function(){
+        if (cancelNextLoad) {
+            cancelNextLoad = false;
+        } else {
+            loadStudentNamesPost();
+        }
+    }, (intervalTime * 1000))
+);
+window.addEventListener('offline', () => 
+    clearInterval(intervalId)
+);
 
 /*function jQueryLoadStudentNames() {
     $.getJSON('studentNames.json', function(data) {
@@ -282,15 +296,13 @@ function updateNewestStudent() {
     if (newestStudent == null) {
         document.getElementById("newestStudent").innerHTML = "";
         oldNewestStudent = newestStudent;
-    } else {
-        if (newestStudent !== oldNewestStudent) {
-            document.getElementById("newestStudent").innerHTML = newestStudent;
-            oldNewestStudent = newestStudent;
-            if (tts) {
-                var msg = new SpeechSynthesisUtterance();
-                msg.text = newestStudent;
-                window.speechSynthesis.speak(msg);
-            }
+    } else if (newestStudent != oldNewestStudent) {
+        document.getElementById("newestStudent").innerHTML = newestStudent;
+        oldNewestStudent = newestStudent;
+        if (tts) {
+            var msg = new SpeechSynthesisUtterance();
+            msg.text = newestStudent;
+            window.speechSynthesis.speak(msg);
         }
     }
 }
@@ -300,10 +312,20 @@ function submitName(newName) {
     loadStudentNamesPost();
     listOfStudents.push(newName);
     cancelNextLoad = true;
-    modifyNames(listOfStudents);
+    sendStudentNames();
+    //modifyNames(listOfStudents);
 }
 
-function modifyNames() {
+function sendStudentNames() {
+    if (window.navigator.onLine) {
+        $.post( "./editStudentNames.php", { list: JSON.stringify(listOfStudents), password: password })
+        .done(function( data ) {
+            loadStudentNamesPost();
+        });
+    }
+}
+
+/*function modifyNames() {
   var text = "[";
   for(let i = 0; i < listOfStudents.length; i++) {
       text += "\"";
@@ -319,13 +341,16 @@ function modifyNames() {
 
 function sendNameUpdates(formattedList) {
   const xhttp = new XMLHttpRequest();
+  console.log(formattedList);
   xhttp.open("GET", "editStudentNames.php?list="+formattedList+"?password="+password);
   xhttp.onload = function() {
     //cancelNextLoad = true;
     //loadStudentNamesPost();
   }
-  xhttp.send();
-}
+  if (window.navigator.onLine) {
+    xhttp.send();
+  }
+}*/
 
 function displayNames() {
     let text = "";
