@@ -309,19 +309,13 @@ function updateNewestStudent() {
 
 function submitName(newName) {
     document.getElementById("studentName").value = '';
-    loadStudentNamesPost();
-    listOfStudents.push(newName);
-    cancelNextLoad = true;
-    sendStudentNames();
-    //modifyNames(listOfStudents);
-}
-
-function sendStudentNames() {
     if (window.navigator.onLine) {
-        $.post( "./editStudentNames.php", { list: JSON.stringify(listOfStudents), password: password })
+        $.post( "./editStudentNames.php", { name: newName, password: password })
         .done(function( data ) {
             loadStudentNamesPost();
         });
+    } else {
+        alert("Offline.");
     }
 }
 
