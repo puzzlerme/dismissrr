@@ -7,8 +7,8 @@
 
 <?php
     $salt = "SENtxqzqMrcWIVhShV01.LkLNSJkggNw";
-    if (file_get_contents('adminPassword.json') == hash('sha256', htmlspecialchars($_GET['password'], ENT_QUOTES) . $salt)) {
-        echo file_put_contents('studentNames.json', htmlspecialchars($_GET['list'] . $salt, ENT_QUOTES));
+    if (file_get_contents('adminPassword.json') == hash('sha256', htmlspecialchars($_POST['password'], ENT_QUOTES) . $salt)) {
+        echo file_put_contents('studentNames.json', htmlspecialchars($_POST['list'], ENT_QUOTES));
     }
     //header("Location: http://www.dismissrr.rf.gd");
 ?>
