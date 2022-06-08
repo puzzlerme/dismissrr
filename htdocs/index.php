@@ -310,7 +310,7 @@ function updateNewestStudent() {
 function submitName(newName) {
     document.getElementById("studentName").value = '';
     if (window.navigator.onLine) {
-        $.post( "./editStudentNames.php", { name: newName, password: password })
+        $.post( "./addStudent.php", { name: newName, password: password })
         .done(function( data ) {
             loadStudentNamesPost();
         });
@@ -336,7 +336,7 @@ function submitName(newName) {
 function sendNameUpdates(formattedList) {
   const xhttp = new XMLHttpRequest();
   console.log(formattedList);
-  xhttp.open("GET", "editStudentNames.php?list="+formattedList+"?password="+password);
+  xhttp.open("GET", "addStudent.php?list="+formattedList+"?password="+password);
   xhttp.onload = function() {
     //cancelNextLoad = true;
     //loadStudentNamesPost();
