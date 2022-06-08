@@ -84,7 +84,7 @@
 
 <div id="enterName">
     <p id="enterNameText">Enter Name: <input type="text" id="studentName" value ="" size=20>
-    <button id="submit" onclick="submitName(studentName.value)">Submit</button>
+    <button id="submit" onclick="addStudent(studentName.value)">Submit</button>
 </div>
 <div style="width: 400px; margin:0 auto;" id="reader"></div>
 
@@ -147,7 +147,7 @@ function enterPassword() {
             var elem = document.getElementById("studentName");
             elem.onkeyup = function(e){
                 if(e.keyCode == 13){
-                submitName(studentName.value);
+                    addStudent(studentName.value);
                 }
             }
         }
@@ -307,10 +307,10 @@ function updateNewestStudent() {
     }
 }
 
-function submitName(newName) {
+function addStudent(name) {
     document.getElementById("studentName").value = '';
     if (window.navigator.onLine) {
-        $.post( "./addStudent.php", { name: newName, password: password })
+        $.post( "./addStudent.php", { name: name, password: password })
         .done(function( data ) {
             loadStudentNamesPost();
         });
@@ -319,32 +319,16 @@ function submitName(newName) {
     }
 }
 
-/*function modifyNames() {
-  var text = "[";
-  for(let i = 0; i < listOfStudents.length; i++) {
-      text += "\"";
-      text += listOfStudents[i]; 
-      text += "\"";
-      if (i !== listOfStudents.length - 1) {
-          text += ", ";
-      }
-  }
-  text += "]";
-  sendNameUpdates(text);
+function removeStudent(id) {
+    if (window.navigator.onLine) {
+        $.post( "./removeStudent.php", { id: id, password: password })
+        .done(function( data ) {
+            loadStudentNamesPost();
+        });
+    } else {
+        alert("Offline.");
+    }
 }
-
-function sendNameUpdates(formattedList) {
-  const xhttp = new XMLHttpRequest();
-  console.log(formattedList);
-  xhttp.open("GET", "addStudent.php?list="+formattedList+"?password="+password);
-  xhttp.onload = function() {
-    //cancelNextLoad = true;
-    //loadStudentNamesPost();
-  }
-  if (window.navigator.onLine) {
-    xhttp.send();
-  }
-}*/
 
 function displayNames() {
     let text = "";
