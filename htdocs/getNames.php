@@ -6,9 +6,11 @@
 <body>
 
 <?php
-    $salt = "SENtxqzqMrcWIVhShV01.LkLNSJkggNw";
-    if (file_get_contents('adminPassword.json') == hash('sha256', htmlspecialchars($_POST['password'], ENT_QUOTES) . $salt) or file_get_contents('password.json') == hash('sha256', htmlspecialchars($_POST['password'], ENT_QUOTES) . $salt)) {
-        echo file_get_contents('studentNames.json');
+    if (ctype_alnum($_POST['password'])) {
+        $salt = "SENtxqzqMrcWIVhShV01.LkLNSJkggNw";
+        if (file_get_contents('adminPassword.json') == hash('sha256', $_POST['password'] . $salt) || file_get_contents('password.json') == hash('sha256', $_POST['password'] . $salt)) {
+            echo file_get_contents('studentNames.json');
+        }
     }
 ?>
 
