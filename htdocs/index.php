@@ -375,11 +375,13 @@ function displayNames(nameList, deletedList) {
                     span.innerHTML = list[j];
                     if (i == 0) {
                         span.classList.add("name");
+                        span.setAttribute('id', 'name-' + j);
+                        span.setAttribute('onclick', "removeStudent(this.id.replace('name-', ''));");
                     } else {
                         span.classList.add("namedel");
+                        span.setAttribute('id', 'delname-' + j);
+                        // Maybe add a feature where it either permanently removes a name or re-adds a name?
                     }
-                    span.setAttribute('id', 'name-' + j);
-                    span.setAttribute('onclick', "removeStudent(this.id.replace('name-', ''));");
                     div.appendChild(span);
                     if (i != list.length) { 
                         br = document.createElement("br");
