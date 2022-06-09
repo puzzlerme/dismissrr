@@ -69,6 +69,21 @@
       border-radius: 6px;
   }
 
+  .name {
+      width: auto;
+  }
+
+  .name:hover {
+      text-decoration: line-through;
+      cursor: pointer;
+      //border: 1px solid red;
+  }
+
+  .namedel {
+      color: red;
+      font-weight: bold;
+  }
+
   /*.button:hover {
       background-color: #4CAF50;
       color: black;
@@ -89,6 +104,8 @@
 <div style="width: 400px; margin:0 auto;" id="reader"></div>
 
 <span style="text-decoration: underline">List of Students: </span><span id="listOfStudentsText"></span>
+<div id="namediv"></div>
+<div id="deldiv"></div>
 
 <div id="studentNameLoader">
   <button type="button" class="button" onclick="loadStudentNamesPost()">Force Load New Names</button>
@@ -97,14 +114,7 @@
 <br>
 <button type="button" class="button" onclick="clearInterval(intervalId)">Stop Loading</button>
 <button type="button" class="button" onclick="window.speechSynthesis.cancel()">Fix TTS</button>
-<button id="resetNames" type="button" class="button" onclick='sendNameUpdates("[]")'>Reset Names</button>
-
-<?php
-    /*function loadNamesPHP() {
-        $namesJSON = file_get_contents('./studentNames.json');
-        return $namesJSON;
-    }*/
-?>
+<button id="resetNames" type="button" class="button" onclick='resetStudents()'>Reset Names</button>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="sha256.min.js"></script>
@@ -215,50 +225,20 @@ var mask = new RegExp('^[A-Za-z0-9 ]*$')
 $("input").regexMask(mask)
 
 var listOfStudents = new Array();
+var deletedListOfStudents = new Array();
 var intervalTime = 3;
 var tts = false;
 var cancelNextLoad = false;
-
-/*function loadStudentNamesPHP() {
-    listOfStudents = <//?php echo loadNamesPHP();?>;
-    updateNewestStudent();
-    displayNames();
-}*/
-
-/*function loadStudentNamesXML() {
-  var xhttp = new XMLHttpRequest();
-  xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-     var parsedResponse = JSON.parse(this.response);
-     listOfStudents = parsedResponse;
-     updateNewestStudent();
-     displayNames();
-    }
-  }
-  xhttp.open("GET", "studentNames.json", true);
-  xhttp.send();
-}*/
-
-/*function loadStudentNamesAjax() {
-    var namesReturn = jQuery.ajax('./getNames.php?password=' + password);
-    namesReturn.then(() => namesLoaded());
-
-    function namesLoaded() {
-        let raw = namesReturn.responseText.replace("<!DOCTYPE html>\n<html>\n<head>\n    <meta http-equiv=\"Content-Security-Policy\" content=\"upgrade-insecure-requests\">\n</head>\n<body>\n\n", "").replace("\n</body>\n</html>", "");
-        listOfStudents = JSON.parse(raw);
-        updateNewestStudent();
-        displayNames();
-    }
-}*/
 
 function loadStudentNamesPost() {
     if (window.navigator.onLine) {
         $.post( "./getNames.php", { password: password })
         .done(function( data ) {
             let raw = data.replace("<!DOCTYPE html>\n<html>\n<head>\n    <meta http-equiv=\"Content-Security-Policy\" content=\"upgrade-insecure-requests\">\n</head>\n<body>\n\n", "").replace("\n</body>\n</html>", "");
-            listOfStudents = JSON.parse(raw);
+            listOfStudents = JSON.parse(JSON.parse(raw)[0]);
+            deletedListOfStudents = JSON.parse(JSON.parse(raw)[1]);
             updateNewestStudent();
-            displayNames();
+            displayNames(listOfStudents, deletedListOfStudents);
         });
     }
 }
@@ -274,14 +254,6 @@ window.addEventListener('online', () =>
 window.addEventListener('offline', () => 
     clearInterval(intervalId)
 );
-
-/*function jQueryLoadStudentNames() {
-    $.getJSON('studentNames.json', function(data) {
-    listOfStudents = data;
-    updateNewestStudent();
-    displayNames();
-    });
-}*/
 
 if ('speechSynthesis' in window) {
     tts = true;
@@ -307,6 +279,13 @@ function updateNewestStudent() {
     }
 }
 
+function removeElementsByClass(className){
+    const elements = document.getElementsByClassName(className);
+    while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+    }
+}
+
 function addStudent(name) {
     document.getElementById("studentName").value = '';
     if (window.navigator.onLine) {
@@ -320,6 +299,10 @@ function addStudent(name) {
 }
 
 function removeStudent(id) {
+    document.getElementsByClassName('name')[id].remove();
+    deletedListOfStudents.push(listOfStudents[id]);
+    listOfStudents.splice(id, 1);
+    displayNames(listOfStudents, deletedListOfStudents);
     if (window.navigator.onLine) {
         $.post( "./removeStudent.php", { id: id, password: password })
         .done(function( data ) {
@@ -330,15 +313,82 @@ function removeStudent(id) {
     }
 }
 
-function displayNames() {
-    let text = "";
-    text += "<br>";
-    if (listOfStudents.length > 0) {
-        for (let i = 0; i < listOfStudents.length; i++) {
-            text += listOfStudents[listOfStudents.length - i - 1] + "<br>";
+function resetStudents() {
+    removeElementsByClass('name');
+    removeElementsByClass('namdel');
+    listOfStudents = [];
+    deletedListOfStudents = [];
+    displayNames(listOfStudents, deletedListOfStudents);
+    if (window.navigator.onLine) {
+        $.post( "./resetStudents.php", { password: password })
+        .done(function( data ) {
+            loadStudentNamesPost();
+        });
+    } else {
+        alert("Offline.");
+    }
+}
+
+
+function arraysEqual(a, b) {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (a.length !== b.length) return false;
+
+  // If you don't care about the order of the elements inside
+  // the array, you should sort both arrays here.
+  // Please note that calling sort on an array will modify that array.
+  // you might want to clone your array first.
+
+  for (var i = 0; i < a.length; ++i) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+var oldList1;
+var oldList2;
+function displayNames(nameList, deletedList) {
+    for (let i = 0; i < 2; i++) {
+        let oldList;
+        let list;
+        if (i == 0) {
+            oldList = oldList1;
+            list = nameList;
+        } else {
+            oldList = oldList2;
+            list = deletedList;
+        }
+        if (oldList == null || !(arraysEqual(oldList, list))) {
+            oldList = [].concat(list);
+            if (i == 0) {
+                div = document.getElementById("namediv");
+            } else {
+                div = document.getElementById("deldiv");
+            }
+            while (div.firstChild) {
+                div.removeChild(div.firstChild);
+            }
+            if (list.length > 0) {
+                for (let j = 0; j < list.length; j++) {
+                    let span = document.createElement("span");
+                    span.innerHTML = list[j];
+                    if (i == 0) {
+                        span.classList.add("name");
+                    } else {
+                        span.classList.add("namedel");
+                    }
+                    span.setAttribute('id', 'name-' + j);
+                    span.setAttribute('onclick', "removeStudent(this.id.replace('name-', ''));");
+                    div.appendChild(span);
+                    if (i != list.length) { 
+                        br = document.createElement("br");
+                        div.appendChild(br);
+                    }
+                }
+            }
         }
     }
-    document.getElementById("listOfStudentsText").innerHTML = text;
 }
 
 </script>

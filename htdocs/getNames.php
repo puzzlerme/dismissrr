@@ -9,7 +9,7 @@
     if (ctype_alnum($_POST['password'])) {
         $salt = "SENtxqzqMrcWIVhShV01.LkLNSJkggNw";
         if (file_get_contents('adminPassword.json') == hash('sha256', $_POST['password'] . $salt) || file_get_contents('password.json') == hash('sha256', $_POST['password'] . $salt)) {
-            echo file_get_contents('studentNames.json');
+            echo json_encode([file_get_contents('studentNames.json'), file_get_contents('deletedStudentNames.json')]);
         }
     }
 ?>
