@@ -363,10 +363,11 @@ function displayNames(nameList = listOfStudents, deletedList = deletedListOfStud
             list = deletedList;
         }
         if (oldList == null || !(arraysEqual(oldList, list))) {
-            oldList = [].concat(list);
             if (i == 0) {
+                oldList1 = [].concat(listOfStudents);
                 div = document.getElementById("namediv");
             } else {
+                oldList2 = [].concat(deletedListOfStudents);
                 div = document.getElementById("deldiv");
             }
             while (div.firstChild) {
@@ -380,9 +381,11 @@ function displayNames(nameList = listOfStudents, deletedList = deletedListOfStud
                         span.classList.add("name");
                         if (permissions >= 2) {
                             span.classList.add("namehov");
-                            span.setAttribute('onclick', "removeStudent(this.id.replace('name-', ''));");
+                            span.setAttribute('onclick', "removeStudent([].map.call(document.getElementsByClassName('name'), elem => elem.textContent).findIndex(element => element == this.textContent));")
+                            //span.setAttribute('onclick', "let elements = document.getElementsByClassName('name'); let data = [].map.call(elements, elem => elem.textContent); let index = data.findIndex(element => element == this.textContent); console.log(index);");
+                            //span.setAttribute('onclick', "removeStudent(this.id.replace('name-', ''));");
                         }
-                        span.setAttribute('id', 'name-' + j);
+                        //span.setAttribute('id', 'name-' + j);
                     } else {
                         span.classList.add("namedel");
                         span.setAttribute('id', 'delname-' + j);
