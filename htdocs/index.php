@@ -73,10 +73,12 @@
       width: auto;
   }
 
-  .namehov:hover {
-      text-decoration: line-through;
-      cursor: pointer;
-      //border: 1px solid red;
+  @media (hover: hover) {
+    .namehov:hover {
+        text-decoration: line-through;
+        cursor: pointer;
+        //border: 1px solid red;
+    }
   }
 
   .namedel {
