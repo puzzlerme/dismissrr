@@ -303,8 +303,8 @@ function addStudent(name) {
 
 function removeStudent(id) {
     document.getElementsByClassName('name')[id].remove();
-    deletedListOfStudents.push(listOfStudents[id]);
-    listOfStudents.splice(id, 1);
+    deletedListOfStudents.push(listOfStudents[listOfStudents.length - id - 1]);
+    listOfStudents.splice(listOfStudents.length - id - 1, 1);
     displayNames();
     if (window.navigator.onLine) {
         $.post( "./removeStudent.php", { id: id, password: password })
@@ -376,7 +376,7 @@ function displayNames(nameList = listOfStudents, deletedList = deletedListOfStud
             if (list.length > 0) {
                 for (let j = 0; j < list.length; j++) {
                     let span = document.createElement("span");
-                    span.innerHTML = list[j];
+                    span.innerHTML = list[list.length - j - 1];
                     if (i == 0) {
                         span.classList.add("name");
                         if (permissions >= 2) {
@@ -388,7 +388,7 @@ function displayNames(nameList = listOfStudents, deletedList = deletedListOfStud
                         //span.setAttribute('id', 'name-' + j);
                     } else {
                         span.classList.add("namedel");
-                        span.setAttribute('id', 'delname-' + j);
+                        //span.setAttribute('id', 'delname-' + j);
                         // Maybe add a feature where it either permanently removes a name or re-adds a name?
                     }
                     div.appendChild(span);
