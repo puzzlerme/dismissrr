@@ -380,9 +380,9 @@ function displayNames(nameList = listOfStudents, deletedList = deletedListOfStud
                         span.classList.add("name");
                         if (permissions >= 2) {
                             span.classList.add("namehov");
+                            span.setAttribute('onclick', "removeStudent(this.id.replace('name-', ''));");
                         }
                         span.setAttribute('id', 'name-' + j);
-                        span.setAttribute('onclick', "removeStudent(this.id.replace('name-', ''));");
                     } else {
                         span.classList.add("namedel");
                         span.setAttribute('id', 'delname-' + j);
