@@ -142,7 +142,7 @@ function enterPassword() {
     var passwordCorrect;
 
     function checkPassword(data) {
-        passwordCorrect = data.includes("1") || data.includes("2");
+        passwordCorrect = data.includes("1") || data.includes("2") || data.includes("3");
         if (data.includes("1")) {
             permissions = 1;
             let removeElement;
@@ -154,6 +154,15 @@ function enterPassword() {
             removeElement.parentElement.removeChild(removeElement);
         } else if (data.includes("2")) {
             permissions = 2;
+            let removeElement;
+            removeElement = document.getElementById('enterName');
+            removeElement.parentElement.removeChild(removeElement);
+            removeElement = document.getElementById('resetNames');
+            removeElement.parentElement.removeChild(removeElement);
+            removeElement = document.getElementById('reader');
+            removeElement.parentElement.removeChild(removeElement);
+        } else if (data.includes("3")) {
+            permissions = 3;
             var elem = document.getElementById("studentName");
             elem.onkeyup = function(e){
                 if(e.keyCode == 13){
