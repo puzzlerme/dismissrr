@@ -73,7 +73,7 @@
       width: auto;
   }
 
-  .name:hover {
+  .namehov:hover {
       text-decoration: line-through;
       cursor: pointer;
       //border: 1px solid red;
@@ -144,7 +144,7 @@ function enterPassword() {
     function checkPassword(data) {
         passwordCorrect = data.includes("1") || data.includes("2");
         if (data.includes("1")) {
-            permissions = "User";
+            permissions = 1;
             let removeElement;
             removeElement = document.getElementById('enterName');
             removeElement.parentElement.removeChild(removeElement);
@@ -153,7 +153,7 @@ function enterPassword() {
             removeElement = document.getElementById('reader');
             removeElement.parentElement.removeChild(removeElement);
         } else if (data.includes("2")) {
-            permissions = "Admin";
+            permissions = 2;
             var elem = document.getElementById("studentName");
             elem.onkeyup = function(e){
                 if(e.keyCode == 13){
@@ -238,7 +238,7 @@ function loadStudentNamesPost() {
             listOfStudents = JSON.parse(JSON.parse(raw)[0]);
             deletedListOfStudents = JSON.parse(JSON.parse(raw)[1]);
             updateNewestStudent();
-            displayNames(listOfStudents, deletedListOfStudents);
+            displayNames();
         });
     }
 }
@@ -287,6 +287,9 @@ function removeElementsByClass(className){
 }
 
 function addStudent(name) {
+    listOfStudents.push(name);
+    displayNames();
+    updateNewestStudent();
     document.getElementById("studentName").value = '';
     if (window.navigator.onLine) {
         $.post( "./addStudent.php", { name: name, password: password })
@@ -302,7 +305,7 @@ function removeStudent(id) {
     document.getElementsByClassName('name')[id].remove();
     deletedListOfStudents.push(listOfStudents[id]);
     listOfStudents.splice(id, 1);
-    displayNames(listOfStudents, deletedListOfStudents);
+    displayNames();
     if (window.navigator.onLine) {
         $.post( "./removeStudent.php", { id: id, password: password })
         .done(function( data ) {
@@ -318,7 +321,7 @@ function resetStudents() {
     removeElementsByClass('namdel');
     listOfStudents = [];
     deletedListOfStudents = [];
-    displayNames(listOfStudents, deletedListOfStudents);
+    displayNames();
     if (window.navigator.onLine) {
         $.post( "./resetStudents.php", { password: password })
         .done(function( data ) {
@@ -348,7 +351,7 @@ function arraysEqual(a, b) {
 
 var oldList1;
 var oldList2;
-function displayNames(nameList, deletedList) {
+function displayNames(nameList = listOfStudents, deletedList = deletedListOfStudents) {
     for (let i = 0; i < 2; i++) {
         let oldList;
         let list;
@@ -375,6 +378,9 @@ function displayNames(nameList, deletedList) {
                     span.innerHTML = list[j];
                     if (i == 0) {
                         span.classList.add("name");
+                        if (permissions >= 2) {
+                            span.classList.add("namehov");
+                        }
                         span.setAttribute('id', 'name-' + j);
                         span.setAttribute('onclick', "removeStudent(this.id.replace('name-', ''));");
                     } else {
