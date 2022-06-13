@@ -6,7 +6,7 @@
 <body>
 
 <?php
-    if (ctype_alnum($_POST['password']) && ctype_alnum($_POST['name'])) {
+    if (ctype_alnum($_POST['password']) && ctype_alnum(str_replace(' ','',$_POST['name']))) {
         $salt = "SENtxqzqMrcWIVhShV01.LkLNSJkggNw";
         if (file_get_contents('adminPassword.json') == hash('sha256', $_POST['password'] . $salt)) {
             $names = file_get_contents('studentNames.json');
