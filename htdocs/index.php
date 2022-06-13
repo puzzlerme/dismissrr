@@ -305,7 +305,7 @@ function addStudent(name) {
     if (window.navigator.onLine) {
         $.post( "./addStudent.php", { name: name, password: password })
         .done(function( data ) {
-            loadStudentNamesPost();
+            //loadStudentNamesPost();
         });
     } else {
         alert("Offline.");
@@ -313,14 +313,16 @@ function addStudent(name) {
 }
 
 function removeStudent(id) {
+    realID = listOfStudents.length - id - 1;
     document.getElementsByClassName('name')[id].remove();
     deletedListOfStudents.push(listOfStudents[listOfStudents.length - id - 1]);
     listOfStudents.splice(listOfStudents.length - id - 1, 1);
     displayNames();
+    updateNewestStudent();
     if (window.navigator.onLine) {
-        $.post( "./removeStudent.php", { id: id, password: password })
+        $.post( "./removeStudent.php", { id: realID, password: password })
         .done(function( data ) {
-            loadStudentNamesPost();
+            //loadStudentNamesPost();
         });
     } else {
         alert("Offline.");
@@ -336,7 +338,7 @@ function resetStudents() {
     if (window.navigator.onLine) {
         $.post( "./resetStudents.php", { password: password })
         .done(function( data ) {
-            loadStudentNamesPost();
+            //loadStudentNamesPost();
         });
     } else {
         alert("Offline.");
